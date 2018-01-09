@@ -1,0 +1,8 @@
+D:\F#\TimeOffLast\TimeOffEvents\build\Exercise.exe.config
+D:\F#\TimeOffLast\TimeOffEvents\build\Exercise.exe
+D:\F#\TimeOffLast\TimeOffEvents\build\Exercise.pdb
+D:\F#\TimeOffLast\TimeOffEvents\build\Exercise.XML
+D:\F#\TimeOffLast\TimeOffEvents\TimeOffEvents\obj\Release\Exercise.fsprojResolveAssemblyReference.cache
+D:\F#\TimeOffLast\TimeOffEvents\TimeOffEvents\obj\Release\Exercise.fsproj.Exercise.exe.config
+D:\F#\TimeOffLast\TimeOffEvents\TimeOffEvents\obj\Release\Exercise.exe
+D:\F#\TimeOffLast\TimeOffEvents\TimeOffEvents\obj\Release\Exercise.pdb
