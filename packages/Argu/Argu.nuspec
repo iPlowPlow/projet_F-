@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Argu</id>
+    <version>4.0.0</version>
+    <authors>Eirik Tsarpalis</authors>
+    <owners>Eirik Tsarpalis</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/fsprojects/Argu/blob/master/License.md</licenseUrl>
+    <projectUrl>http://fsprojects.github.io/Argu/</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/fsprojects/Argu/master/docs/files/img/logo.png</iconUrl>
+    <description>A declarative command line and XML configuration parser for F# applications.</description>
+    <summary>A declarative command line and XML configuration parser for F# applications.</summary>
+    <releaseNotes>Support NetStandard 2.0
+Add Environment Variable configuration reader.</releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>F# argument parser</tags>
+    <dependencies>
+      <group>
+        <dependency id="FSharp.Core" version="3.1.0" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="FSharp.Core" version="4.2.1" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+    <references>
+      <reference file="Argu.dll" />
+    </references>
+  </metadata>
+</package>
