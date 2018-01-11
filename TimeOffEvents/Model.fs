@@ -16,6 +16,10 @@ type Boundary = {
 
 type UserId = int
 
+type Person(name:string, userId:UserId) =
+  member x.Name = name
+  member x.UserId = userId
+
 type TimeOffRequest = {
     UserId: UserId
     RequestId: Guid
@@ -110,3 +114,16 @@ module Logic =
         | ValidateRequest (_, requestId) ->
             let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
             validateRequest requestState
+
+    let getHalfDayString halfDay =
+        if (halfDay.Equals(AM)) then "AM" else "PM"
+
+    //faut que je fasse fonctionner ce truc
+    (*
+    let getUserName (userId:int, userList:List<Person>) (name: string)= 
+        let mutable returnName = String.Empty; 
+        for i in userList do
+            returnName = if(userId.Equals(i.UserId)) then i.Name else String.Empty 
+
+        |> name
+     *)
