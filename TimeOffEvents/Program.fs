@@ -6,6 +6,7 @@ open System.Collections.Generic
 open Logic
 open EventStorage
 
+
 let mutable continueProg = true;
 let store = InMemoryStore.Create<UserId, RequestEvent>()
 
@@ -14,9 +15,6 @@ usersList.Add(new Person (userId= 1, name = "Azedine" ))
 usersList.Add(new Person (userId= 2, name = "Loic" ))
 usersList.Add(new Person (userId= 3, name = "Andre" ))
 usersList.Add(new Person (userId= 3, name = "Bob" ))
-
-(*for i = 1 to 4 do
-    usersList.Add(User.Employee i);*)
 
 let manager = User.Manager;
 
@@ -66,13 +64,21 @@ let demandeConges() =
         let apresMidiEnd = System.Console.ReadLine() |> char;
         let DateEndHaldDay = if (apresMidiEnd.Equals('o')) then PM else AM
         let command = Command.RequestTimeOff { UserId = idUser
-                                               RequestId = new Guid();
+                                               RequestId = Guid.NewGuid();
                                                Start = { Date = DateStart; HalfDay = DateStartHaldDay }
                                                End = { Date = DateEnd; HalfDay = DateEndHaldDay } 
                                              }
-        //Return RequestCreated
-        //let result = Logic.handleCommand store command
 
+
+        //Return RequestCreated
+        let result = Logic.handleCommand store command
+        match result with
+            | Ok events ->
+                for event in events do
+                  let stream = store.GetStream event.Request.UserId
+                  stream.Append [event]
+            | Error e -> printfn "Error: %s" e
+            
         printfn "Fin de la demande de conges"
 
 
@@ -80,10 +86,12 @@ let listeConges() =
     printfn "liste des demandes de conges"
     let mutable testExist = false;
     let mutable nbTry = 0;
-    printfn "idUser : ";
+    printfn "idUser : (0 for all)";
     let mutable idUser = 0;
     while testExist = false && nbTry <3  do
         idUser <- System.Console.ReadLine() |> int;
+        if idUser = 0 then 
+            testExist <- true;
         for user in usersList do
             if user.UserId = int idUser then 
                testExist <- true;
@@ -91,8 +99,19 @@ let listeConges() =
         nbTry <- nbTry + 1;
     
     if testExist = false  then printfn "Trop de tentatives, retour au menu"
-    //else
-    //   store.GetStream.
+    elif idUser = 0 then
+         printfn "===============================All ===============================" 
+    else
+        let stream = store.GetStream idUser
+        let listEventsUser = stream.ReadAll();
+        if Seq.length listEventsUser = 0 then printfn "Aucune demande de congés pour cette utilisateur"
+        else 
+            for event in listEventsUser do 
+                printfn "===============================Demande numéros : %A ===============================" event.Request.RequestId
+                printfn "Nom : " 
+                printfn "Date debut :  %A %A" event.Request.Start.Date event.Request.Start.HalfDay
+                printfn "Date fin :  %A %A" event.Request.End.Date event.Request.End.HalfDay
+
 
 
 let main() =
