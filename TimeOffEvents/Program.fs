@@ -18,6 +18,24 @@ usersList.Add(new Person (userId= 3, name = "Bob" ))
 
 let manager = User.Manager;
 
+let displayConges id = 
+    let stream = store.GetStream id
+    let listEventsUser = stream.ReadAll();
+    if Seq.length listEventsUser = 0 then printfn "Aucune demande de congés pour cette utilisateur"
+    else 
+       
+        for event in listEventsUser do 
+            let tmpSeq = seq { yield event }
+            let statEvent = getRequestState tmpSeq
+            let dispStat = statEvent.GetType()
+            printfn "===============================Demande numéros : %A ===============================" event.Request.RequestId
+            printfn "Nom : " 
+            printfn "Date debut :  %A %A" event.Request.Start.Date event.Request.Start.HalfDay
+            printfn "Date fin :  %A %A" event.Request.End.Date event.Request.End.HalfDay
+           
+            printfn "Etat de la demande : %s"  dispStat.Name
+            printfn ""
+
 let demandeConges() = 
     printfn "==========================Faire une demande de conges====================="
     printfn "Merci de renseigner les champs suivants : \" idUser, dateStart, dateEnd\" "
@@ -77,6 +95,7 @@ let demandeConges() =
                 for event in events do
                   let stream = store.GetStream event.Request.UserId
                   stream.Append [event]
+
             | Error e -> printfn "Error: %s" e
             
         printfn "Fin de la demande de conges"
@@ -100,19 +119,15 @@ let listeConges() =
     
     if testExist = false  then printfn "Trop de tentatives, retour au menu"
     elif idUser = 0 then
-         printfn "===============================All ===============================" 
+         printfn "=============================== All ===============================" 
+         for user in usersList do
+            displayConges user.UserId
     else
-        let stream = store.GetStream idUser
-        let listEventsUser = stream.ReadAll();
-        if Seq.length listEventsUser = 0 then printfn "Aucune demande de congés pour cette utilisateur"
-        else 
-            for event in listEventsUser do 
-                printfn "===============================Demande numéros : %A ===============================" event.Request.RequestId
-                printfn "Nom : " 
-                printfn "Date debut :  %A %A" event.Request.Start.Date event.Request.Start.HalfDay
-                printfn "Date fin :  %A %A" event.Request.End.Date event.Request.End.HalfDay
+        displayConges idUser
+        
 
-
+let updateDemandeConges() =
+    printfn "========================== Valider/refuser une demande de conges====================="
 
 let main() =
     let mutable i = 0;  
@@ -120,13 +135,15 @@ let main() =
         
         printfn "========================Bienvenue dans le gestionnaire de conges. Merci de choisir une fonctionnalite.===============================";
         printfn "1 : Faire une demande de conges";
-        printfn "2 : liste des demandes de conges";
-        printfn "3 : consulter soldes d'un utilisateur";
+        printfn "2 : Liste des demandes de conges";
+        printfn "4 : Valider/refuser une demande de conges";
+        printfn "3 : Consulter soldes d'un utilisateur";
         printfn "0 : Quitter";
 
         let choice =  System.Console.ReadLine();
         if choice = "1" then demandeConges();
         elif choice = "2" then listeConges();
+        elif choice = "3" then updateDemandeConges();
         elif choice = "0" then continueProg <- false;
         else  printfn "Ce choix n'existe pas";
         
