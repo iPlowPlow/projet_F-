@@ -36,3 +36,6 @@ type private InMemoryStore<'TKey, 'TValue when 'TKey: comparison> () =
 type InMemoryStore =
   static member Create<'TKey, 'TValue when 'TKey: comparison>() =
     InMemoryStore<'TKey, 'TValue>() :> IStore<'TKey, 'TValue>
+
+(*type Store() =
+    inherit IStore()*)

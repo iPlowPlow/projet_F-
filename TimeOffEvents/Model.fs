@@ -2,6 +2,7 @@
 
 open System
 open EventStorage
+open System.Collections.Generic
 
 type User =
     | Employee of int
@@ -15,6 +16,10 @@ type Boundary = {
 }
 
 type UserId = int
+
+type Person(name:string, userId:UserId) =
+    member x.Name = name
+    member x.UserId = userId
 
 type TimeOffRequest = {
     UserId: UserId
@@ -110,3 +115,12 @@ module Logic =
         | ValidateRequest (_, requestId) ->
             let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
             validateRequest requestState
+
+    let getHalfDayString halfDay =
+        if (halfDay.Equals(AM)) then "AM" else "PM"
+
+    let getUserName (userId:int, userList:List<Person>) = 
+        let mutable returnName:string = String.Empty; 
+        for i in userList do
+            if(userId.Equals(i.UserId)) then returnName <- i.Name
+        returnName
