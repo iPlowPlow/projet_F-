@@ -18,6 +18,8 @@ usersList.Add(new Person (userId= 3, name = "Bob" ))
 
 let manager = User.Manager;
 
+
+
 let displayConges id = 
     let stream = store.GetStream id
     let listEventsUser = stream.ReadAll();
@@ -29,12 +31,15 @@ let displayConges id =
             let statEvent = getRequestState tmpSeq
             let dispStat = statEvent.GetType()
             printfn "===============================Demande numéros : %A ===============================" event.Request.RequestId
-            printfn "Nom : " 
+            printfn "Nom : %s" (string (Logic.getUserName(id, usersList)))
             printfn "Date debut :  %A %A" event.Request.Start.Date event.Request.Start.HalfDay
             printfn "Date fin :  %A %A" event.Request.End.Date event.Request.End.HalfDay
            
             printfn "Etat de la demande : %s"  dispStat.Name
             printfn ""
+
+
+
 
 let demandeConges() = 
     printfn "==========================Faire une demande de conges====================="
@@ -101,6 +106,9 @@ let demandeConges() =
         printfn "Fin de la demande de conges"
 
 
+
+
+
 let listeConges() = 
     printfn "liste des demandes de conges"
     let mutable testExist = false;
@@ -126,8 +134,63 @@ let listeConges() =
         displayConges idUser
         
 
+
+
+
+
+
+
 let updateDemandeConges() =
     printfn "========================== Valider/refuser une demande de conges====================="
+    let mutable testExist = false;
+    let mutable nbTry = 0;
+    printfn "idUser :";
+    let mutable idUser = 0;
+    while testExist = false && nbTry <3  do
+        idUser <- System.Console.ReadLine() |> int;
+        for user in usersList do
+            if user.UserId = int idUser then 
+               testExist <- true;
+        if testExist = false then printfn "Utilisateur non reconu, merci de recommencer";
+        nbTry <- nbTry + 1;
+    
+    if testExist = false  then printfn "Trop de tentatives, retour au menu"
+    else 
+        let stream = store.GetStream idUser
+        let listEventsUser = stream.ReadAll();
+        if Seq.length listEventsUser = 0 then printfn "Aucune demande de congés pour cette utilisateur"
+        else 
+            printfn "Liste des congés a traiter :"
+            for event in listEventsUser do 
+                let tmpSeq = seq { yield event }
+                let statEvent = getRequestState tmpSeq
+                let dispStat = statEvent.GetType()
+                if(dispStat.Name = "PendingValidation") then
+                    printfn "%A" event.Request.RequestId
+            printfn "GUID :"
+            let choiceGUID =  System.Console.ReadLine();    
+            printfn "Valider ou refuser (v/r) :";
+            let action =  System.Console.ReadLine();  
+            let myEvent = new List<RequestEvent>()
+            for event in listEventsUser do 
+                if event.Request.RequestId.ToString() = choiceGUID then
+                    myEvent.Add(event)
+                    printf ""
+            if(action = "v") then                     
+                let command = Command.ValidateRequest (idUser, myEvent.[0].Request.RequestId)
+                let result = Logic.handleCommand store command
+                match result with
+                    | Ok events ->
+                        for event in events do
+                            let stream = store.GetStream event.Request.UserId
+                            stream.Append [event]
+                    | Error e -> printfn "Error: %s" e
+                    
+                printfn "Demande Validée"
+                        
+
+
+
 
 let main() =
     let mutable i = 0;  
@@ -136,8 +199,8 @@ let main() =
         printfn "========================Bienvenue dans le gestionnaire de conges. Merci de choisir une fonctionnalite.===============================";
         printfn "1 : Faire une demande de conges";
         printfn "2 : Liste des demandes de conges";
-        printfn "4 : Valider/refuser une demande de conges";
-        printfn "3 : Consulter soldes d'un utilisateur";
+        printfn "3 : Valider/refuser une demande de conges (manageur)";
+        printfn "4 : Consulter soldes d'un utilisateur";
         printfn "0 : Quitter";
 
         let choice =  System.Console.ReadLine();
