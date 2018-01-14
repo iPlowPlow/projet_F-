@@ -175,15 +175,16 @@ module Db =
         let mutable used:int = 0; 
         let mutable planned:int = 0; 
         for i in userRequests do
-            let currentRequest = i.Value.Request
-            let mutable TimeOffLength:int = ((int)((currentRequest.End.Date - currentRequest.Start.Date).TotalDays)+1)*2
-            if(currentRequest.Start.HalfDay.Equals(HalfDay.PM)) then 
-                TimeOffLength<- (TimeOffLength-1)
-            if(currentRequest.End.HalfDay.Equals(HalfDay.AM)) then 
-                TimeOffLength<- (TimeOffLength-1)
-            if(currentRequest.Start.Date > DateTime.Now) then
-                planned <- planned + TimeOffLength else
-                    used <- used + TimeOffLength
+            if(i.Value.Equals(PendingValidation) || i.Value.Equals(Validated) || i.Value.Equals(CancelRefused) || i.Value.Equals(CancelPendingValidation)) then
+                let currentRequest = i.Value.Request
+                let mutable TimeOffLength:int = ((int)((currentRequest.End.Date - currentRequest.Start.Date).TotalDays)+1)*2
+                if(currentRequest.Start.HalfDay.Equals(HalfDay.PM)) then 
+                    TimeOffLength<- (TimeOffLength-1)
+                if(currentRequest.End.HalfDay.Equals(HalfDay.AM)) then 
+                    TimeOffLength<- (TimeOffLength-1)
+                if(currentRequest.Start.Date > DateTime.Now) then
+                    planned <- planned + TimeOffLength else
+                        used <- used + TimeOffLength
 
         let usedDays:double = ((double)used)/2.0;
         let plannedDays:double = ((double)planned)/2.0;
