@@ -50,3 +50,21 @@ module Db =
         let result = Seq.toArray seqEvents
         let r = result.[0]
         r
+
+    let ValidateTimeOff request = 
+        let seqEvents = seq {
+            let command = Command.ValidateRequest (request.UserId, request.RequestId)
+            let result = Logic.handleCommand store command
+            match result with
+                | Ok events ->
+                    for event in events do
+                        let stream = store.GetStream event.Request.UserId
+                        stream.Append [event]
+                        if event.Request.RequestId = request.RequestId then yield event
+                | Error e -> printfn "Error: %s" e
+        }
+
+        let result = Seq.toArray seqEvents
+        let r = result.[0]
+        r
+  

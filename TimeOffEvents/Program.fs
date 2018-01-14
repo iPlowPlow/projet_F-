@@ -18,6 +18,7 @@ module TimeOff =
         let repository = {
             GetAll = Db.getAllTimeOffRequest
             CreateTimeOff = Db.createTimeOffRequest
+            ValidateTimeOff = Db.ValidateTimeOff
         }
 
         let app =

@@ -32,7 +32,10 @@ module Restful =
             path "/TimeOff/Create" >=> choose [
                 POST >=> request (getResourceFromReq >> repository.CreateTimeOff >> JSON)
             ] 
-            path "/TimeOff/Get" >=> choose [
+            path "/TimeOff/GetAll" >=> choose [
                 GET >=> request (getResourceFromReq >> repository.GetAll >> JSON)
+            ]
+            path "/TimeOff/Validate" >=> choose [
+                POST >=> request (getResourceFromReq >> repository.ValidateTimeOff >> JSON)
             ] 
         ]
