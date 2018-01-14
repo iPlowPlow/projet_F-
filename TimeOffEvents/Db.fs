@@ -29,6 +29,7 @@ module Db =
        
         seqEvents
 
+
     let createTimeOffRequest request =
 
         let newRequest = { UserId = request.UserId
