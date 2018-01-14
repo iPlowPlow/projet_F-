@@ -143,6 +143,13 @@ module Db =
 
         Some listEventsUser
 
+    let getUserById id =
+        let isUserId number (elem:Person) = elem.UserId.Equals(number) = true
+        let mutable person:Person = usersList.[0]; 
+        for user in usersList do
+            if(user.UserId.Equals(id)) then person <- user
+        Some person
+
     let getBalanceById id =
         let stream = store.GetStream id
         let listEventsUser = stream.ReadAll();

@@ -21,6 +21,7 @@ module TimeOff =
             GetById = Db.getTimeOffByIdUser
             CreateTimeOff = Db.createTimeOffRequest
             CancelTimeOffByEmployee = Db.cancelTimeOffByEmployee
+            GetCurrentUserById = Db.getUserById
             GetCurrentBalanceById = Db.getBalanceById
         }
 
