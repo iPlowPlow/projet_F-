@@ -10,10 +10,10 @@ module Db =
     let store = InMemoryStore.Create<UserId, RequestEvent>()
 
     let usersList = new List<Person>()
-    usersList.Add(new Person (userId= 1, name = "Azedine" ))
-    usersList.Add(new Person (userId= 2, name = "Loic" ))
-    usersList.Add(new Person (userId= 3, name = "Andre" ))
-    usersList.Add(new Person (userId= 3, name = "Bob" ))
+    usersList.Add(new Person (userId= 1, name = "Azedine", email="az@gmail.com" ))
+    usersList.Add(new Person (userId= 2, name = "Loic", email="loic@gmail.com" ))
+    usersList.Add(new Person (userId= 3, name = "Andre", email="andre@gmail.com" ))
+    usersList.Add(new Person (userId= 4, name = "Bob", email="bob@gmail.com" ))
 
     let manager = User.Manager;
 
@@ -159,4 +159,36 @@ module Db =
     let getTimeOffByIdUser id =
         let stream = store.GetStream id
         let listEventsUser = stream.ReadAll();
+
         Some listEventsUser
+
+    let getUserById id =
+        let isUserId number (elem:Person) = elem.UserId.Equals(number) = true
+        let mutable person:Person = usersList.[0]; 
+        for user in usersList do
+            if(user.UserId.Equals(id)) then person <- user
+        Some person
+
+    let getBalanceById id =
+        let stream = store.GetStream id
+        let listEventsUser = stream.ReadAll();
+        let userRequests = getAllRequests listEventsUser
+        let mutable used:int = 0; 
+        let mutable planned:int = 0; 
+        for i in userRequests do
+            let currentRequest = i.Value.Request
+            let mutable TimeOffLength:int = ((int)((currentRequest.End.Date - currentRequest.Start.Date).TotalDays)+1)*2
+            if(currentRequest.Start.HalfDay.Equals(HalfDay.PM)) then 
+                TimeOffLength<- (TimeOffLength-1)
+            if(currentRequest.End.HalfDay.Equals(HalfDay.AM)) then 
+                TimeOffLength<- (TimeOffLength-1)
+            if(currentRequest.Start.Date > DateTime.Now) then
+                planned <- planned + TimeOffLength else
+                    used <- used + TimeOffLength
+
+        let usedDays:double = ((double)used)/2.0;
+        let plannedDays:double = ((double)planned)/2.0;
+        let availableDays:double = 20.0 - (usedDays+plannedDays)
+        let newSolde = new SoldeJour(userId=id,total=20.0,used=usedDays,planned=plannedDays,available=availableDays);
+
+        Some newSolde
