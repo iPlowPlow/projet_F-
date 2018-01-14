@@ -49,7 +49,7 @@ type Command =
     | RequestTimeOff of TimeOffRequest
     | ValidateRequest of UserId * Guid 
     | RefuseRequest of UserId * Guid
-    | RequestCancelTimeOffByEmployee of UserId * Guid
+    | CancelTimeOffByEmployeeRequest of UserId * Guid
     | ValidateCancelRequest of UserId * Guid 
     | RefuseCancelRequest of UserId * Guid 
     member this.UserId =
@@ -57,7 +57,7 @@ type Command =
         | RequestTimeOff request -> request.UserId
         | ValidateRequest (userId, _) -> userId
         | RefuseRequest  (userId, _) -> userId
-        | RequestCancelTimeOffByEmployee  (userId, _) -> userId
+        | CancelTimeOffByEmployeeRequest  (userId, _) -> userId
         | ValidateCancelRequest  (userId, _) -> userId
         | RefuseCancelRequest  (userId, _) -> userId
 
@@ -88,7 +88,6 @@ type RequestEvent =
         | RequestCancelValidatedByEmployee (request, date) -> date
         | RequestCancelValidated (request, date) -> date
         | RequestCancelRefused (request, date) -> date
-   
 
 
 
@@ -242,7 +241,7 @@ module Logic =
         | RefuseRequest (_, requestId) ->
             let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
             refuseRequest requestState
-        | RequestCancelTimeOffByEmployee (_, requestId) ->
+        | CancelTimeOffByEmployeeRequest (_, requestId) ->
             let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
             cancelRequestByEmployee requestState requestState.Request.Start.Date
         | ValidateCancelRequest (_, requestId) ->
@@ -252,7 +251,6 @@ module Logic =
             let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
             refuseCancelRequest requestState
 
-       
 
     let getHalfDayString halfDay =
         if (halfDay.Equals(AM)) then "AM" else "PM"

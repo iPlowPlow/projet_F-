@@ -5,6 +5,6 @@ type UserRepository<'a> = {
     GetById : int -> 'a seq option
     GetCurrentBalanceById : int -> SoldeJour option
     GetCurrentUserById : int -> Person option
-    CreateTimeOff : TimeOffRequest -> 'a
-    CancelTimeOffByEmployee : TimeOffRequest -> 'a
+    CreateTimeOff : TimeOffRequest -> 'a option
+    CancelTimeOffByEmployee : TimeOffRequest -> 'a option
 }

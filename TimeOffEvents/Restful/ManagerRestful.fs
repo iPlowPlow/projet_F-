@@ -38,15 +38,15 @@ module Manager =
                 GET >=> request (getResourceFromReq >> repository.GetAll >> JSON)
             ]
             path (resourcePath + "/Validate") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.ValidateTimeOff >> JSON)
+                POST >=> request (getResourceFromReq >> repository.ValidateTimeOff >>  handleResource (NOT_FOUND "Erreur lors de la validation"))
             ] 
             path (resourcePath + "/Refuse") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.RefuseTimeOff >> JSON)
+                POST >=> request (getResourceFromReq >> repository.RefuseTimeOff >>  handleResource (NOT_FOUND "Erreur lors du Refus"))
             ] 
             path (resourcePath + "/Cancel/Validate") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.ValidateCancelTimeOff >> JSON)
+                POST >=> request (getResourceFromReq >> repository.ValidateCancelTimeOff >>  handleResource (NOT_FOUND "Erreur lors de la validation"))
             ] 
             path (resourcePath + "/Cancel/Refuse") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.RefuseCancelTimeOff >> JSON)
+                POST >=> request (getResourceFromReq >> repository.RefuseCancelTimeOff >>  handleResource (NOT_FOUND "Erreur lors du refus"))
             ] 
         ]
