@@ -19,6 +19,8 @@ module Manager =
         let getString rawForm = System.Text.Encoding.UTF8.GetString(rawForm)
         req.rawForm |> getString |> fromJson<'a>
 
+
+
     let ManagerAPI (repository: ManagerRepository<RequestEvent>) =
 
         let resourcePath = "/Manager"
@@ -28,7 +30,7 @@ module Manager =
         let handleResource requestError resource =
             match resource with
                 | Some r -> r |> JSON
-                | _ -> requestError
+                | _ -> requestError |> JSON
 
         let getAll _ = repository.GetAll () |> JSON
 
@@ -38,15 +40,15 @@ module Manager =
                 GET >=> request (getResourceFromReq >> repository.GetAll >> JSON)
             ]
             path (resourcePath + "/Validate") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.ValidateTimeOff >>  handleResource (NOT_FOUND "Erreur lors de la validation"))
+                POST >=> request (getResourceFromReq >> repository.ValidateTimeOff >>  handleResource ({err = "Erreur lors du Refus"}))
             ] 
             path (resourcePath + "/Refuse") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.RefuseTimeOff >>  handleResource (NOT_FOUND "Erreur lors du Refus"))
+                POST >=> request (getResourceFromReq >> repository.RefuseTimeOff >>  handleResource ({err =  "Erreur lors du Refus"}))
             ] 
             path (resourcePath + "/Cancel/Validate") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.ValidateCancelTimeOff >>  handleResource (NOT_FOUND "Erreur lors de la validation"))
+                POST >=> request (getResourceFromReq >> repository.ValidateCancelTimeOff >>  handleResource ({err =  "Erreur lors de la validation"}))
             ] 
             path (resourcePath + "/Cancel/Refuse") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.RefuseCancelTimeOff >>  handleResource (NOT_FOUND "Erreur lors du refus"))
+                POST >=> request (getResourceFromReq >> repository.RefuseCancelTimeOff >>  handleResource ({err =  "Erreur lors du refus"}))
             ] 
         ]

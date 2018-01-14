@@ -18,8 +18,11 @@ module User =
     let private getResourceFromReq<'a> (req : HttpRequest) =
         let getString rawForm = System.Text.Encoding.UTF8.GetString(rawForm)
         req.rawForm |> getString |> fromJson<'a>
+   
 
     let UserAPI (repository: UserRepository<RequestEvent>) =
+
+        
 
         let resourcePath = "/User"
         let resourceIdPath = new PrintfFormat<(int -> string),unit,string,string,int>(resourcePath + "/%d")
@@ -31,24 +34,24 @@ module User =
         let handleResource requestError resource =
             match resource with
                 | Some r -> r |> JSON
-                | _ -> requestError
+                | _ -> requestError |> JSON
 
         let getResourceById =
-            repository.GetById >> handleResource (NOT_FOUND "Resource not found")
+            repository.GetById >> handleResource ({err = "Resource not found"})
 
         let getBalanceById=
-            repository.GetCurrentBalanceById >> handleResource (NOT_FOUND "Resource not found")
+            repository.GetCurrentBalanceById >> handleResource ({err = "Resource not found"})
 
         let getUserById=
-            repository.GetCurrentUserById >> handleResource (NOT_FOUND "Resource not found")
+            repository.GetCurrentUserById >> handleResource ({err = "Resource not found"})
        
         choose [
            
             path (resourcePath+"/Create") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.CreateTimeOff >> handleResource (NOT_FOUND "Erreur lors de la création"))
+                POST >=> request (getResourceFromReq >> repository.CreateTimeOff >> handleResource ({err =  "Erreur lors de la création"}))
             ] 
             path (resourcePath + "/Cancel/Employee") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.CancelTimeOffByEmployee >> handleResource (NOT_FOUND "Erreur lors de la demande d'annulation"))
+                POST >=> request (getResourceFromReq >> repository.CancelTimeOffByEmployee >> handleResource ({err =  "Erreur lors de la demande d'annulation"}))
             ]
             GET >=> pathScan ressourceIdPathBalance getBalanceById
             GET >=> pathScan ressourceIdPathUser getUserById

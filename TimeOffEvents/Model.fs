@@ -4,6 +4,10 @@ open System
 open EventStorage
 open System.Collections.Generic
 
+type JSONerr = {
+    err: string
+}
+
 type User =
     | Employee of int
     | Manager
@@ -88,8 +92,6 @@ type RequestEvent =
         | RequestCancelValidatedByEmployee (request, date) -> date
         | RequestCancelValidated (request, date) -> date
         | RequestCancelRefused (request, date) -> date
-
-
 
 module Logic =
 
