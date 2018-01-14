@@ -48,8 +48,11 @@ module Db =
                 | Error e -> printfn "Error: %s" e
         }
         let result = Seq.toArray seqEvents
-        let r = result.[0]
-        r
+        if result.Length > 0 then
+            let r = result.[0]
+            Some r
+        else 
+            None
 
     let validateTimeOff request = 
         let seqEvents = seq {
@@ -65,8 +68,11 @@ module Db =
         }
 
         let result = Seq.toArray seqEvents
-        let r = result.[0]
-        r
+        if result.Length > 0 then
+            let r = result.[0]
+            Some r
+        else 
+            None
   
 
     let refuseTimeOff request = 
@@ -83,8 +89,11 @@ module Db =
         }
 
         let result = Seq.toArray seqEvents
-        let r = result.[0]
-        r
+        if result.Length > 0 then
+            let r = result.[0]
+            Some r
+        else 
+            None
 
     let cancelTimeOffByEmployee request = 
         let seqEvents = seq {
@@ -100,8 +109,11 @@ module Db =
         }
 
         let result = Seq.toArray seqEvents
-        let r = result.[0]
-        r
+        if result.Length > 0 then
+            let r = result.[0]
+            Some r
+        else 
+            None
 
     let validateCancelTimeOff request = 
         let seqEvents = seq {
@@ -117,8 +129,11 @@ module Db =
         }
 
         let result = Seq.toArray seqEvents
-        let r = result.[0]
-        r
+        if result.Length > 0 then
+            let r = result.[0]
+            Some r
+        else 
+            None
 
     let refuseCancelTimeOff request = 
         let seqEvents = seq {
@@ -134,8 +149,11 @@ module Db =
         }
 
         let result = Seq.toArray seqEvents
-        let r = result.[0]
-        r
+        if result.Length > 0 then
+            let r = result.[0]
+            Some r
+        else 
+            None
 
     let getTimeOffByIdUser id =
         let stream = store.GetStream id

@@ -37,10 +37,10 @@ module User =
         choose [
            
             path (resourcePath+"/Create") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.CreateTimeOff >> JSON)
+                POST >=> request (getResourceFromReq >> repository.CreateTimeOff >> handleResource (NOT_FOUND "Erreur lors de la création"))
             ] 
             path (resourcePath + "/Cancel/Employee") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.CancelTimeOffByEmployee >> JSON)
+                POST >=> request (getResourceFromReq >> repository.CancelTimeOffByEmployee >> handleResource (NOT_FOUND "Erreur lors de la demande d'annulation"))
             ]
             
             GET >=> pathScan ressourceIdPathTimeOff getResourceById
