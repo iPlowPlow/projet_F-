@@ -24,6 +24,7 @@ module User =
         let resourcePath = "/User"
         let resourceIdPath = new PrintfFormat<(int -> string),unit,string,string,int>(resourcePath + "/%d")
         let ressourceIdPathTimeOff = new PrintfFormat<(int -> string),unit,string,string,int>(resourcePath + "/GetTimeOffByIdUser/%d")
+        let ressourceIdPathBalance = new PrintfFormat<(int -> string),unit,string,string,int>(resourcePath + "/GetCurrentBalanceById/%d")
         let badRequest = BAD_REQUEST "Resource not found"
 
         let handleResource requestError resource =
@@ -33,6 +34,9 @@ module User =
 
         let getResourceById =
             repository.GetById >> handleResource (NOT_FOUND "Resource not found")
+
+        let getBalanceById=
+            repository.GetCurrentBalanceById >> handleResource (NOT_FOUND "Resource not found")
        
         choose [
            
@@ -42,6 +46,6 @@ module User =
             path (resourcePath + "/Cancel/Employee") >=> choose [
                 POST >=> request (getResourceFromReq >> repository.CancelTimeOffByEmployee >> JSON)
             ]
-            
+            GET >=> pathScan ressourceIdPathBalance getBalanceById
             GET >=> pathScan ressourceIdPathTimeOff getResourceById
         ]

@@ -21,15 +21,28 @@ type DateEvent = {
     DateCreationEvent: DateTime
 }
 
-type Person(name:string, userId:UserId) =
+type Person(name:string, userId:UserId, email:string) =
     member x.Name = name
     member x.UserId = userId
+    member x.Email = email
+
+type SoldeJour(userId: int, total: double, used: double, planned: double, available: double) =
+    member x.UserId = userId
+    member x.Total = total
+    member x.Used = used
+    member x.Planned = planned
+    member x.Available = available 
 
 type TimeOffRequest = {
     UserId: UserId
     RequestId: Guid
     Start: Boundary
     End: Boundary
+}
+
+type RequestPull = {
+    item1: TimeOffRequest
+    item2: DateEvent
 }
 
 type Command =
@@ -66,6 +79,15 @@ type RequestEvent =
         | RequestCancelValidatedByEmployee (request, date) -> request
         | RequestCancelValidated (request, date) -> request
         | RequestCancelRefused (request, date) -> request
+    member this.Date =
+        match this with
+        | RequestCreated (request, date) -> date 
+        | RequestValidated (request, date) -> date
+        | RequestRefused (request, date) -> date
+        | RequestCancelCreated (request, date) -> date
+        | RequestCancelValidatedByEmployee (request, date) -> date
+        | RequestCancelValidated (request, date) -> date
+        | RequestCancelRefused (request, date) -> date
    
 
 

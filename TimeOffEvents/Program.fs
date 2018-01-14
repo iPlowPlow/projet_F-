@@ -21,6 +21,7 @@ module TimeOff =
             GetById = Db.getTimeOffByIdUser
             CreateTimeOff = Db.createTimeOffRequest
             CancelTimeOffByEmployee = Db.cancelTimeOffByEmployee
+            GetCurrentBalanceById = Db.getBalanceById
         }
 
         let managerRepository = {
