@@ -38,7 +38,19 @@ module Restful =
             path (resourcePath+"GetAll") >=> choose [
                 GET >=> request (getResourceFromReq >> repository.GetAll >> JSON)
             ]
-            path "/TimeOff/Validate" >=> choose [
+            path (resourcePath + "Validate") >=> choose [
                 POST >=> request (getResourceFromReq >> repository.ValidateTimeOff >> JSON)
+            ] 
+            path (resourcePath + "Refuse") >=> choose [
+                POST >=> request (getResourceFromReq >> repository.RefuseTimeOff >> JSON)
+            ] 
+            path (resourcePath + "Cancel/Employee") >=> choose [
+                POST >=> request (getResourceFromReq >> repository.CancelTimeOffByEmployee >> JSON)
+            ]
+            path (resourcePath + "Cancel/Validate") >=> choose [
+                POST >=> request (getResourceFromReq >> repository.ValidateCancelTimeOff >> JSON)
+            ] 
+            path (resourcePath + "Cancel/Refuse") >=> choose [
+                POST >=> request (getResourceFromReq >> repository.RefuseCancelTimeOff >> JSON)
             ] 
         ]

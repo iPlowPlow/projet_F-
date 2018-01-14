@@ -51,7 +51,7 @@ module Db =
         let r = result.[0]
         r
 
-    let ValidateTimeOff request = 
+    let validateTimeOff request = 
         let seqEvents = seq {
             let command = Command.ValidateRequest (request.UserId, request.RequestId)
             let result = Logic.handleCommand store command
@@ -68,3 +68,71 @@ module Db =
         let r = result.[0]
         r
   
+
+    let refuseTimeOff request = 
+        let seqEvents = seq {
+            let command = Command.RefuseRequest (request.UserId, request.RequestId)
+            let result = Logic.handleCommand store command
+            match result with
+                | Ok events ->
+                    for event in events do
+                        let stream = store.GetStream event.Request.UserId
+                        stream.Append [event]
+                        if event.Request.RequestId = request.RequestId then yield event
+                | Error e -> printfn "Error: %s" e
+        }
+
+        let result = Seq.toArray seqEvents
+        let r = result.[0]
+        r
+
+    let cancelTimeOffByEmployee request = 
+        let seqEvents = seq {
+            let command = Command.RequestCancelTimeOffByEmployee (request.UserId, request.RequestId)
+            let result = Logic.handleCommand store command
+            match result with
+                | Ok events ->
+                    for event in events do
+                        let stream = store.GetStream event.Request.UserId
+                        stream.Append [event]
+                        if event.Request.RequestId = request.RequestId then yield event
+                | Error e -> printfn "Error: %s" e
+        }
+
+        let result = Seq.toArray seqEvents
+        let r = result.[0]
+        r
+
+    let validateCancelTimeOff request = 
+        let seqEvents = seq {
+            let command = Command.ValidateCancelRequest (request.UserId, request.RequestId)
+            let result = Logic.handleCommand store command
+            match result with
+                | Ok events ->
+                    for event in events do
+                        let stream = store.GetStream event.Request.UserId
+                        stream.Append [event]
+                        if event.Request.RequestId = request.RequestId then yield event
+                | Error e -> printfn "Error: %s" e
+        }
+
+        let result = Seq.toArray seqEvents
+        let r = result.[0]
+        r
+
+    let refuseCancelTimeOff request = 
+        let seqEvents = seq {
+            let command = Command.RefuseCancelRequest (request.UserId, request.RequestId)
+            let result = Logic.handleCommand store command
+            match result with
+                | Ok events ->
+                    for event in events do
+                        let stream = store.GetStream event.Request.UserId
+                        stream.Append [event]
+                        if event.Request.RequestId = request.RequestId then yield event
+                | Error e -> printfn "Error: %s" e
+        }
+
+        let result = Seq.toArray seqEvents
+        let r = result.[0]
+        r

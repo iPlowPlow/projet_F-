@@ -30,41 +30,84 @@ type TimeOffRequest = {
 
 type Command =
     | RequestTimeOff of TimeOffRequest
-    | ValidateRequest of UserId * Guid with
+    | ValidateRequest of UserId * Guid 
+    | RefuseRequest of UserId * Guid
+    | RequestCancelTimeOffByEmployee of UserId * Guid
+    | ValidateCancelRequest of UserId * Guid 
+    | RefuseCancelRequest of UserId * Guid 
     member this.UserId =
         match this with
         | RequestTimeOff request -> request.UserId
         | ValidateRequest (userId, _) -> userId
+        | RefuseRequest  (userId, _) -> userId
+        | RequestCancelTimeOffByEmployee  (userId, _) -> userId
+        | ValidateCancelRequest  (userId, _) -> userId
+        | RefuseCancelRequest  (userId, _) -> userId
+
 
 type RequestEvent =
     | RequestCreated of TimeOffRequest
-    | RequestValidated of TimeOffRequest with
+    | RequestValidated of TimeOffRequest 
+    | RequestRefused of TimeOffRequest 
+    | RequestCancelCreated of TimeOffRequest 
+    | RequestCancelValidatedByEmployee of TimeOffRequest 
+    | RequestCancelValidated of TimeOffRequest 
+    | RequestCancelRefused of TimeOffRequest with
     member this.Request =
         match this with
         | RequestCreated request -> request
         | RequestValidated request -> request
+        | RequestRefused request -> request
+        | RequestCancelCreated request -> request
+        | RequestCancelValidatedByEmployee request -> request
+        | RequestCancelValidated request -> request
+        | RequestCancelRefused request -> request
+       
+
 
 module Logic =
 
     type RequestState =
         | NotCreated
         | PendingValidation of TimeOffRequest
-        | Validated of TimeOffRequest with
+        | Validated of TimeOffRequest 
+        | Refused of TimeOffRequest
+        | CancelPendingValidation of TimeOffRequest 
+        | CancelValidatedByEmployee of TimeOffRequest  
+        | CancelValidated of TimeOffRequest 
+        | CancelRefused of TimeOffRequest with
         member this.Request =
             match this with
             | NotCreated -> invalidOp "Not created"
             | PendingValidation request
             | Validated request -> request
+            | Refused request -> request
+            | CancelPendingValidation request -> request
+            | CancelValidatedByEmployee request -> request
+            | CancelValidated request -> request
+            | CancelRefused request -> request
         member this.IsActive =
             match this with
             | NotCreated -> false
             | PendingValidation _
             | Validated _ -> true
+            | Refused _ -> true
+            | CancelPendingValidation _ -> true
+            | CancelValidatedByEmployee _ -> true
+            | CancelValidated _ -> true
+            | CancelRefused _ -> true
+
 
     let evolve _ event =
         match event with
         | RequestCreated request -> PendingValidation request
         | RequestValidated request -> Validated request
+        | RequestRefused request -> Refused request
+        | RequestCancelCreated request -> CancelPendingValidation request
+        | RequestCancelValidatedByEmployee request -> CancelValidatedByEmployee request
+        | RequestCancelValidated request -> CancelValidated request
+        | RequestCancelRefused request -> CancelRefused request
+      
 
     let getRequestState events =
         events |> Seq.fold evolve NotCreated
@@ -88,12 +131,59 @@ module Logic =
         else
             Ok [RequestCreated request]
 
+    
+
+    let cancelRequestByEmployee requestState date =
+        if date > DateTime.Today then
+            match requestState with
+                | PendingValidation request ->
+                    Ok [RequestCancelValidatedByEmployee request]
+                | Validated request ->
+                    Ok [RequestCancelValidatedByEmployee request]
+                | _ ->
+                    Error "Request cannot be validated"
+        else 
+            match requestState with
+                | PendingValidation request ->
+                    Ok [RequestCancelCreated request]
+                | Validated request ->
+                    Ok [RequestCancelCreated request]
+                | _ ->
+                    Error "Request cannot be validated"
+
+
+    let validateCancelRequest requestState =
+        match requestState with
+        | CancelPendingValidation request ->
+            Ok [RequestCancelValidated request]
+        | Validated request ->
+            Ok [RequestCancelRefused request]
+        | PendingValidation request ->
+            Ok [RequestCancelRefused request]
+        | CancelRefused request ->
+            Ok [RequestCancelRefused request]
+        | _ ->
+            Error "Cancel Request cannot be validate"
+
+    let refuseCancelRequest requestState =
+        match requestState with
+        | CancelPendingValidation request ->
+            Ok [RequestCancelRefused request]
+        | _ ->
+            Error "Cancel Request cannot be refused"
+
     let validateRequest requestState =
         match requestState with
         | PendingValidation request ->
             Ok [RequestValidated request]
         | _ ->
             Error "Request cannot be validated"
+    let refuseRequest requestState =
+        match requestState with
+        | PendingValidation request ->
+            Ok [RequestRefused request]
+        | _ ->
+            Error "Request cannot be refused"
 
     let handleCommand (store: IStore<UserId, RequestEvent>) (command: Command) =
         let userId = command.UserId
@@ -115,6 +205,19 @@ module Logic =
         | ValidateRequest (_, requestId) ->
             let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
             validateRequest requestState
+        | RefuseRequest (_, requestId) ->
+            let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
+            refuseRequest requestState
+        | RequestCancelTimeOffByEmployee (_, requestId) ->
+            let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
+            cancelRequestByEmployee requestState requestState.Request.Start.Date
+        | ValidateCancelRequest (_, requestId) ->
+            let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
+            validateCancelRequest requestState
+        | RefuseCancelRequest (_, requestId) ->
+            let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
+            refuseCancelRequest requestState
+       
 
     let getHalfDayString halfDay =
         if (halfDay.Equals(AM)) then "AM" else "PM"
