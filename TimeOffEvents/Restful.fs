@@ -18,7 +18,10 @@ module Restful =
         let getString rawForm = System.Text.Encoding.UTF8.GetString(rawForm)
         req.rawForm |> getString |> fromJson<'a>
 
-    let TimeOffWebPart (repository: Repository<RequestEvent>) =
+    let TimeOffWebPart resourceName repository =
+
+        let resourcePath = "/" + resourceName + "/"
+        let resourceIdPath = new PrintfFormat<(int -> string),unit,string,string,int>(resourcePath + "/%d")
         let badRequest = BAD_REQUEST "Resource not found"
 
         let handleResource requestError resource =
@@ -29,10 +32,10 @@ module Restful =
         let getAll _ = repository.GetAll () |> JSON
 
         choose [
-            path "/TimeOff/Create" >=> choose [
+            path (resourcePath+"Create") >=> choose [
                 POST >=> request (getResourceFromReq >> repository.CreateTimeOff >> JSON)
             ] 
-            path "/TimeOff/GetAll" >=> choose [
+            path (resourcePath+"GetAll") >=> choose [
                 GET >=> request (getResourceFromReq >> repository.GetAll >> JSON)
             ]
             path "/TimeOff/Validate" >=> choose [

@@ -23,7 +23,7 @@ module TimeOff =
 
         let app =
             choose [
-                Restful.TimeOffWebPart repository
+                Restful.TimeOffWebPart "TimeOff" repository
                 RequestErrors.NOT_FOUND "Found no handlers"
             ]
 
