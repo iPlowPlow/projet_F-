@@ -23,10 +23,10 @@ let creationTests =
         RequestId = Guid.Empty
         Start = { Date = DateTime.Now; HalfDay = AM }
         End = { Date = DateTime(2018,01,10); HalfDay = PM } }
-
+      let myDate = {DateCreationEvent= DateTime.Now} 
       Given [ ]
       |> When (RequestTimeOff request)
-      |> Then (Ok [RequestCreated request]) "The request has been created"
+      |> Then (Ok [RequestCreated (request,myDate)]) "The request has been created"
     }
   ]
 
@@ -38,10 +38,10 @@ let validationTests =
         RequestId = Guid.Empty
         Start = { Date = DateTime.Now; HalfDay = AM }
         End = { Date = DateTime(2018,01,10); HalfDay = PM } }
-
-      Given [ RequestCreated request ]
+      let myDate = {DateCreationEvent= DateTime.Now} 
+      Given [ RequestCreated (request,myDate)]
       |> When (ValidateRequest (1, Guid.Empty))
-      |> Then (Ok [RequestValidated request]) "The request has been validated"
+      |> Then (Ok [RequestValidated (request,myDate)]) "The request has been validated"
     }
   ]
 

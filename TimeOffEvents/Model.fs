@@ -17,6 +17,10 @@ type Boundary = {
 
 type UserId = int
 
+type DateEvent = {
+    DateCreationEvent: DateTime
+}
+
 type Person(name:string, userId:UserId) =
     member x.Name = name
     member x.UserId = userId
@@ -46,24 +50,24 @@ type Command =
 
 
 type RequestEvent =
-    | RequestCreated of TimeOffRequest 
-    | RequestValidated of TimeOffRequest 
-    | RequestRefused of TimeOffRequest 
-    | RequestCancelCreated of TimeOffRequest 
-    | RequestCancelValidatedByEmployee of TimeOffRequest 
-    | RequestCancelValidated of TimeOffRequest 
-    | RequestCancelRefused of TimeOffRequest with
+    | RequestCreated of TimeOffRequest*DateEvent
+    | RequestValidated of TimeOffRequest*DateEvent
+    | RequestRefused of TimeOffRequest*DateEvent
+    | RequestCancelCreated of TimeOffRequest*DateEvent 
+    | RequestCancelValidatedByEmployee of TimeOffRequest*DateEvent 
+    | RequestCancelValidated of TimeOffRequest*DateEvent 
+    | RequestCancelRefused of TimeOffRequest*DateEvent with
     member this.Request =
         match this with
-        | RequestCreated request -> request 
-        | RequestValidated request -> request
-        | RequestRefused request -> request
-        | RequestCancelCreated request -> request
-        | RequestCancelValidatedByEmployee request -> request
-        | RequestCancelValidated request -> request
-        | RequestCancelRefused request -> request
+        | RequestCreated (request, date) -> request 
+        | RequestValidated (request, date) -> request
+        | RequestRefused (request, date) -> request
+        | RequestCancelCreated (request, date) -> request
+        | RequestCancelValidatedByEmployee (request, date) -> request
+        | RequestCancelValidated (request, date) -> request
+        | RequestCancelRefused (request, date) -> request
+   
 
-       
 
 
 module Logic =
@@ -101,13 +105,13 @@ module Logic =
 
     let evolve _ event =
         match event with
-        | RequestCreated request -> PendingValidation request
-        | RequestValidated request -> Validated request
-        | RequestRefused request -> Refused request
-        | RequestCancelCreated request -> CancelPendingValidation request
-        | RequestCancelValidatedByEmployee request -> CancelValidatedByEmployee request
-        | RequestCancelValidated request -> CancelValidated request
-        | RequestCancelRefused request -> CancelRefused request
+        | RequestCreated (request, date) -> PendingValidation request
+        | RequestValidated (request, date) -> Validated request
+        | RequestRefused (request, date) -> Refused request
+        | RequestCancelCreated (request, date) -> CancelPendingValidation request
+        | RequestCancelValidatedByEmployee (request, date) -> CancelValidatedByEmployee request
+        | RequestCancelValidated (request, date) -> CancelValidated request
+        | RequestCancelRefused (request, date) -> CancelRefused request
       
 
     let getRequestState events =
@@ -130,59 +134,66 @@ module Logic =
         elif request.Start.Date <= DateTime.Today then
             Error "The request starts in the past"
         else
-            Ok [RequestCreated request]
+            let myDate = {DateCreationEvent= DateTime.Now} 
+            Ok [RequestCreated (request,myDate) ]
 
     
 
     let cancelRequestByEmployee requestState date =
+        let myDate = {DateCreationEvent= DateTime.Now} 
         if date > DateTime.Today then
             match requestState with
                 | PendingValidation request ->
-                    Ok [RequestCancelValidatedByEmployee request]
+                    Ok [RequestCancelValidatedByEmployee (request,myDate)]
                 | Validated request ->
-                    Ok [RequestCancelValidatedByEmployee request]
+                    Ok [RequestCancelValidatedByEmployee (request,myDate)]
                 | _ ->
                     Error "Request cannot be validated"
         else 
             match requestState with
                 | PendingValidation request ->
-                    Ok [RequestCancelCreated request]
+                    Ok [RequestCancelCreated (request,myDate)]
                 | Validated request ->
-                    Ok [RequestCancelCreated request]
+                    Ok [RequestCancelCreated (request,myDate)]
                 | _ ->
                     Error "Request cannot be validated"
 
 
     let validateCancelRequest requestState =
+        let myDate = {DateCreationEvent= DateTime.Now} 
         match requestState with
         | CancelPendingValidation request ->
-            Ok [RequestCancelValidated request]
+            Ok [RequestCancelValidated (request,myDate)]
         | Validated request ->
-            Ok [RequestCancelRefused request]
+            Ok [RequestCancelRefused (request,myDate)]
         | PendingValidation request ->
-            Ok [RequestCancelRefused request]
+            Ok [RequestCancelRefused (request,myDate)]
         | CancelRefused request ->
-            Ok [RequestCancelRefused request]
+            Ok [RequestCancelRefused (request,myDate)]
         | _ ->
             Error "Cancel Request cannot be validate"
 
     let refuseCancelRequest requestState =
+        let myDate = {DateCreationEvent= DateTime.Now} 
         match requestState with
         | CancelPendingValidation request ->
-            Ok [RequestCancelRefused request]
+            Ok [RequestCancelRefused (request,myDate)]
         | _ ->
             Error "Cancel Request cannot be refused"
 
     let validateRequest requestState =
+        let myDate = {DateCreationEvent= DateTime.Now} 
         match requestState with
         | PendingValidation request ->
-            Ok [RequestValidated request]
+            Ok [RequestValidated (request,myDate)]
         | _ ->
             Error "Request cannot be validated"
+
     let refuseRequest requestState =
+        let myDate = {DateCreationEvent= DateTime.Now} 
         match requestState with
         | PendingValidation request ->
-            Ok [RequestRefused request]
+            Ok [RequestRefused (request,myDate)]
         | _ ->
             Error "Request cannot be refused"
 
@@ -218,6 +229,7 @@ module Logic =
         | RefuseCancelRequest (_, requestId) ->
             let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
             refuseCancelRequest requestState
+
        
 
     let getHalfDayString halfDay =

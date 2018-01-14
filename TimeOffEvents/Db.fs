@@ -140,4 +140,5 @@ module Db =
     let getTimeOffByIdUser id =
         let stream = store.GetStream id
         let listEventsUser = stream.ReadAll();
+
         Some listEventsUser
