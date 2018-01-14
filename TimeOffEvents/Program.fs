@@ -5,6 +5,8 @@ module TimeOff =
     open Expecto
     open System.Collections.Generic
     open TimeOff
+    open TimeOff.Repositories
+    open TimeOff.Restful
     open EventStorage
     open Logic
 
@@ -15,19 +17,23 @@ module TimeOff =
     [<EntryPoint>]
     let main argv =
 
-        let repository = {
-            GetAll = Db.getAllTimeOffRequest
+        let userRepository = {
             CreateTimeOff = Db.createTimeOffRequest
-            ValidateTimeOff = Db.validateTimeOff
-            RefuseTimeOff = Db.refuseTimeOff
             CancelTimeOffByEmployee = Db.cancelTimeOffByEmployee
+        }
+
+        let managerRepository = {
+            GetAll = Db.getAllTimeOffRequest          
+            ValidateTimeOff = Db.validateTimeOff
+            RefuseTimeOff = Db.refuseTimeOff           
             ValidateCancelTimeOff = Db.validateCancelTimeOff
             RefuseCancelTimeOff = Db.refuseCancelTimeOff
         }
 
         let app =
             choose [
-                Restful.TimeOffWebPart "TimeOff" repository
+                User.UserAPI userRepository
+                Manager.ManagerAPI managerRepository
                 RequestErrors.NOT_FOUND "Found no handlers"
             ]
 
