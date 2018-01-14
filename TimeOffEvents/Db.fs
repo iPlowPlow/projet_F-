@@ -88,7 +88,7 @@ module Db =
 
     let cancelTimeOffByEmployee request = 
         let seqEvents = seq {
-            let command = Command.RequestCancelTimeOffByEmployee (request.UserId, request.RequestId)
+            let command = Command.CancelTimeOffByEmployeeRequest (request.UserId, request.RequestId)
             let result = Logic.handleCommand store command
             match result with
                 | Ok events ->
@@ -140,5 +140,4 @@ module Db =
     let getTimeOffByIdUser id =
         let stream = store.GetStream id
         let listEventsUser = stream.ReadAll();
-
         Some listEventsUser
