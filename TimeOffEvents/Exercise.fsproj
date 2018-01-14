@@ -127,11 +127,11 @@
     <Compile Include="JsonConvert.fs" />
     <Compile Include="EventStorage.fs" />
     <Compile Include="Model.fs" />
-    <Compile Include="Repositories\User.fs" />
-    <Compile Include="Repositories\Manager.fs" />
-    <Compile Include="Restful\User.fs" />
-    <Compile Include="Restful\Manager.fs" />
     <Compile Include="Db.fs" />
+    <Compile Include="Repository\ManagerRepository.fs" />
+    <Compile Include="Repository\UserRepository.fs" />
+    <Compile Include="Restful\UserRestful.fs" />
+    <Compile Include="Restful\ManagerRestful.fs" />
     <Compile Include="Tests.fs" />
     <Compile Include="Program.fs" />
     <Content Include="packages.config" />

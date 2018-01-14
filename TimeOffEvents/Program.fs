@@ -5,7 +5,7 @@ module TimeOff =
     open Expecto
     open System.Collections.Generic
     open TimeOff
-    open TimeOff.Repositories
+    open TimeOff.Repository
     open TimeOff.Restful
     open EventStorage
     open Logic
@@ -18,6 +18,7 @@ module TimeOff =
     let main argv =
 
         let userRepository = {
+            GetById = Db.getTimeOffByIdUser
             CreateTimeOff = Db.createTimeOffRequest
             CancelTimeOffByEmployee = Db.cancelTimeOffByEmployee
         }

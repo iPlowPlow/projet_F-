@@ -46,7 +46,7 @@ type Command =
 
 
 type RequestEvent =
-    | RequestCreated of TimeOffRequest
+    | RequestCreated of TimeOffRequest 
     | RequestValidated of TimeOffRequest 
     | RequestRefused of TimeOffRequest 
     | RequestCancelCreated of TimeOffRequest 
@@ -55,13 +55,14 @@ type RequestEvent =
     | RequestCancelRefused of TimeOffRequest with
     member this.Request =
         match this with
-        | RequestCreated request -> request
+        | RequestCreated request -> request 
         | RequestValidated request -> request
         | RequestRefused request -> request
         | RequestCancelCreated request -> request
         | RequestCancelValidatedByEmployee request -> request
         | RequestCancelValidated request -> request
         | RequestCancelRefused request -> request
+
        
 
 

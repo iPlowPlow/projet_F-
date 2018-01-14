@@ -1,4 +1,4 @@
-﻿namespace TimeOff.Repositories
+﻿namespace TimeOff.Repository
 open TimeOff
 
 type ManagerRepository<'a> = {

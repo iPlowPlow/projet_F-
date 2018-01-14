@@ -7,7 +7,7 @@ open Suave.Operators
 open Suave.Http
 open Suave.Successful
 open TimeOff
-open TimeOff.Repositories
+open TimeOff.Repository
 open JsonConvert
 
 
@@ -21,8 +21,9 @@ module User =
 
     let UserAPI (repository: UserRepository<RequestEvent>) =
 
-        let resourcePath = "/User/"
+        let resourcePath = "/User"
         let resourceIdPath = new PrintfFormat<(int -> string),unit,string,string,int>(resourcePath + "/%d")
+        let ressourceIdPathTimeOff = new PrintfFormat<(int -> string),unit,string,string,int>(resourcePath + "/GetTimeOffByIdUser/%d")
         let badRequest = BAD_REQUEST "Resource not found"
 
         let handleResource requestError resource =
@@ -30,13 +31,17 @@ module User =
                 | Some r -> r |> JSON
                 | _ -> requestError
 
-     
-
+        let getResourceById =
+            repository.GetById >> handleResource (NOT_FOUND "Resource not found")
+       
         choose [
-            path (resourcePath+"Create") >=> choose [
+           
+            path (resourcePath+"/Create") >=> choose [
                 POST >=> request (getResourceFromReq >> repository.CreateTimeOff >> JSON)
             ] 
-            path (resourcePath + "Cancel/Employee") >=> choose [
+            path (resourcePath + "/Cancel/Employee") >=> choose [
                 POST >=> request (getResourceFromReq >> repository.CancelTimeOffByEmployee >> JSON)
             ]
+            
+            GET >=> pathScan ressourceIdPathTimeOff getResourceById
         ]

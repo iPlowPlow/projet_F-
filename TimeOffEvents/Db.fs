@@ -136,3 +136,8 @@ module Db =
         let result = Seq.toArray seqEvents
         let r = result.[0]
         r
+
+    let getTimeOffByIdUser id =
+        let stream = store.GetStream id
+        let listEventsUser = stream.ReadAll();
+        Some listEventsUser

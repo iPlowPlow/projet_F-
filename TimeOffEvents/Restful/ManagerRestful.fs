@@ -7,7 +7,7 @@ open Suave.Operators
 open Suave.Http
 open Suave.Successful
 open TimeOff
-open TimeOff.Repositories
+open TimeOff.Repository
 open JsonConvert
 
 
@@ -21,7 +21,7 @@ module Manager =
 
     let ManagerAPI (repository: ManagerRepository<RequestEvent>) =
 
-        let resourcePath = "/Manager/"
+        let resourcePath = "/Manager"
         let resourceIdPath = new PrintfFormat<(int -> string),unit,string,string,int>(resourcePath + "/%d")
         let badRequest = BAD_REQUEST "Resource not found"
 
@@ -34,19 +34,19 @@ module Manager =
 
         choose [
            
-            path (resourcePath+"GetAll") >=> choose [
+            path (resourcePath+"/GetAll") >=> choose [
                 GET >=> request (getResourceFromReq >> repository.GetAll >> JSON)
             ]
-            path (resourcePath + "Validate") >=> choose [
+            path (resourcePath + "/Validate") >=> choose [
                 POST >=> request (getResourceFromReq >> repository.ValidateTimeOff >> JSON)
             ] 
-            path (resourcePath + "Refuse") >=> choose [
+            path (resourcePath + "/Refuse") >=> choose [
                 POST >=> request (getResourceFromReq >> repository.RefuseTimeOff >> JSON)
             ] 
-            path (resourcePath + "Cancel/Validate") >=> choose [
+            path (resourcePath + "/Cancel/Validate") >=> choose [
                 POST >=> request (getResourceFromReq >> repository.ValidateCancelTimeOff >> JSON)
             ] 
-            path (resourcePath + "Cancel/Refuse") >=> choose [
+            path (resourcePath + "/Cancel/Refuse") >=> choose [
                 POST >=> request (getResourceFromReq >> repository.RefuseCancelTimeOff >> JSON)
             ] 
         ]
