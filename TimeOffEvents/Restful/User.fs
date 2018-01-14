@@ -1,4 +1,4 @@
-﻿namespace TimeOff
+﻿namespace TimeOff.Restful
 
 open Newtonsoft.Json
 open Newtonsoft.Json.Serialization
@@ -7,10 +7,11 @@ open Suave.Operators
 open Suave.Http
 open Suave.Successful
 open TimeOff
+open TimeOff.Repositories
 open JsonConvert
 
 
-module Restful = 
+module User = 
     open Suave.RequestErrors
     open Suave.Filters
 
@@ -18,9 +19,9 @@ module Restful =
         let getString rawForm = System.Text.Encoding.UTF8.GetString(rawForm)
         req.rawForm |> getString |> fromJson<'a>
 
-    let TimeOffWebPart resourceName repository =
+    let UserAPI (repository: UserRepository<RequestEvent>) =
 
-        let resourcePath = "/" + resourceName + "/"
+        let resourcePath = "/User/"
         let resourceIdPath = new PrintfFormat<(int -> string),unit,string,string,int>(resourcePath + "/%d")
         let badRequest = BAD_REQUEST "Resource not found"
 
@@ -38,7 +39,4 @@ module Restful =
             path (resourcePath+"GetAll") >=> choose [
                 GET >=> request (getResourceFromReq >> repository.GetAll >> JSON)
             ]
-            path "/TimeOff/Validate" >=> choose [
-                POST >=> request (getResourceFromReq >> repository.ValidateTimeOff >> JSON)
-            ] 
         ]
