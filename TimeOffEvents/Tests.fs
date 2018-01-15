@@ -125,6 +125,20 @@ let cancelRequestRefuseTests =
     }
   ]
 
+let ShouldGetCorrectBalance =
+  testList "Get Balance tests" [
+    test "A request is validated" {
+      let userId = 1
+      let request = {
+        UserId = userId
+        RequestId = Guid.Empty
+        Start = { Date = DateTime(2018,02,1); HalfDay = AM }
+        End = { Date = DateTime(2018,02,10); HalfDay = PM } }
+      let myDate = {DateCreationEvent= DateTime.Now} 
+      let expected:double = (double)10.0
+      Expect.equal expected (Db.getBalanceById(userId).Value).Available "The balance is correctly found"
+    }
+  ]
 
 let tests =
   testList "All tests" [
@@ -135,4 +149,5 @@ let tests =
     cancelRequestAutoValidateTests
     cancelRequestValidateTests
     cancelRequestRefuseTests
+    ShouldGetCorrectBalance
   ]
