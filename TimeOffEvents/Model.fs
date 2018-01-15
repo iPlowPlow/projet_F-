@@ -158,7 +158,7 @@ module Logic =
             Error "The request starts in the past"
         else
             let myDate = {DateCreationEvent= DateTime.Now} 
-            Ok [RequestCreated (request,myDate) ]
+            Ok [RequestCreated (request,myDate)] 
 
     
 
