@@ -17,6 +17,66 @@ module Db =
 
     let manager = User.Manager;
 
+    let getBalanceById id =
+        let stream = store.GetStream id
+        let listEventsUser = stream.ReadAll();
+        let userRequests = getAllRequests listEventsUser
+        let mutable used:int = 0; 
+        let mutable planned:int = 0; 
+        for i in userRequests do
+            match i.Value with
+                | PendingValidation request -> 
+                    let currentRequest = i.Value.Request
+                    let mutable TimeOffLength:int = ((int)((currentRequest.End.Date - currentRequest.Start.Date).TotalDays)+1)*2
+                    if(currentRequest.Start.HalfDay.Equals(HalfDay.PM)) then 
+                        TimeOffLength<- (TimeOffLength-1)
+                    if(currentRequest.End.HalfDay.Equals(HalfDay.AM)) then 
+                        TimeOffLength<- (TimeOffLength-1)
+                    if(currentRequest.Start.Date > DateTime.Now) then
+                        planned <- planned + TimeOffLength else
+                            used <- used + TimeOffLength
+                | Validated request -> 
+                    let currentRequest = i.Value.Request
+                    let mutable TimeOffLength:int = ((int)((currentRequest.End.Date - currentRequest.Start.Date).TotalDays)+1)*2
+                    if(currentRequest.Start.HalfDay.Equals(HalfDay.PM)) then 
+                        TimeOffLength<- (TimeOffLength-1)
+                    if(currentRequest.End.HalfDay.Equals(HalfDay.AM)) then 
+                        TimeOffLength<- (TimeOffLength-1)
+                    if(currentRequest.Start.Date > DateTime.Now) then
+                        planned <- planned + TimeOffLength else
+                            used <- used + TimeOffLength
+                | CancelRefused request -> 
+                    let currentRequest = i.Value.Request
+                    let mutable TimeOffLength:int = ((int)((currentRequest.End.Date - currentRequest.Start.Date).TotalDays)+1)*2
+                    if(currentRequest.Start.HalfDay.Equals(HalfDay.PM)) then 
+                        TimeOffLength<- (TimeOffLength-1)
+                    if(currentRequest.End.HalfDay.Equals(HalfDay.AM)) then 
+                        TimeOffLength<- (TimeOffLength-1)
+                    if(currentRequest.Start.Date > DateTime.Now) then
+                        planned <- planned + TimeOffLength else
+                            used <- used + TimeOffLength
+                | CancelPendingValidation request -> 
+                    let currentRequest = i.Value.Request
+                    let mutable TimeOffLength:int = ((int)((currentRequest.End.Date - currentRequest.Start.Date).TotalDays)+1)*2
+                    if(currentRequest.Start.HalfDay.Equals(HalfDay.PM)) then 
+                        TimeOffLength<- (TimeOffLength-1)
+                    if(currentRequest.End.HalfDay.Equals(HalfDay.AM)) then 
+                        TimeOffLength<- (TimeOffLength-1)
+                    if(currentRequest.Start.Date > DateTime.Now) then
+                        planned <- planned + TimeOffLength else
+                            used <- used + TimeOffLength
+                | _ -> printfn ""
+
+           
+               
+
+        let usedDays:double = ((double)used)/2.0;
+        let plannedDays:double = ((double)planned)/2.0;
+        let availableDays:double = 20.0 - (usedDays+plannedDays)
+        let newSolde = new SoldeJour(userId=id,total=20.0,used=usedDays,planned=plannedDays,available=availableDays);
+
+        Some newSolde
+
     let getAllTimeOffRequest ()=
         let seqEvents = seq {
             for user in usersList do
@@ -37,23 +97,28 @@ module Db =
                            Start = request.Start
                            End = request.End
                          }
-        let seqEvents = seq {
-            let command = Command.RequestTimeOff newRequest
-            let result = Logic.handleCommand store command
-            match result with
-                | Ok events ->
-                    for event in events do
-                        let stream = store.GetStream event.Request.UserId
-                        stream.Append [event]
-                        if event.Request.RequestId = newRequest.RequestId then yield event
-                | Error e -> printfn "Error: %s" e
-        }
-        let result = Seq.toArray seqEvents
-        if result.Length > 0 then
-            let r = result.[0]
-            Some r
+        let soldeDesire = ((double)((request.End.Date - request.Start.Date).TotalDays))
+        let mySolde = getBalanceById request.UserId
+
+        if  mySolde.Value.Available < soldeDesire then None
         else 
-            None
+            let seqEvents = seq {
+                let command = Command.RequestTimeOff newRequest
+                let result = Logic.handleCommand store command
+                match result with
+                    | Ok events ->
+                        for event in events do
+                            let stream = store.GetStream event.Request.UserId
+                            stream.Append [event]
+                            if event.Request.RequestId = newRequest.RequestId then yield event
+                    | Error e -> printfn "Error: %s" e
+            }
+            let result = Seq.toArray seqEvents
+            if result.Length > 0 then
+                let r = result.[0]
+                Some r
+            else 
+                None
 
     let validateTimeOff request = 
         let seqEvents = seq {
@@ -169,27 +234,4 @@ module Db =
             if(user.UserId.Equals(id)) then person <- user
         Some person
 
-    let getBalanceById id =
-        let stream = store.GetStream id
-        let listEventsUser = stream.ReadAll();
-        let userRequests = getAllRequests listEventsUser
-        let mutable used:int = 0; 
-        let mutable planned:int = 0; 
-        for i in userRequests do
-            if(i.Value.Equals(PendingValidation) || i.Value.Equals(Validated) || i.Value.Equals(CancelRefused) || i.Value.Equals(CancelPendingValidation)) then
-                let currentRequest = i.Value.Request
-                let mutable TimeOffLength:int = ((int)((currentRequest.End.Date - currentRequest.Start.Date).TotalDays)+1)*2
-                if(currentRequest.Start.HalfDay.Equals(HalfDay.PM)) then 
-                    TimeOffLength<- (TimeOffLength-1)
-                if(currentRequest.End.HalfDay.Equals(HalfDay.AM)) then 
-                    TimeOffLength<- (TimeOffLength-1)
-                if(currentRequest.Start.Date > DateTime.Now) then
-                    planned <- planned + TimeOffLength else
-                        used <- used + TimeOffLength
-
-        let usedDays:double = ((double)used)/2.0;
-        let plannedDays:double = ((double)planned)/2.0;
-        let availableDays:double = 20.0 - (usedDays+plannedDays)
-        let newSolde = new SoldeJour(userId=id,total=20.0,used=usedDays,planned=plannedDays,available=availableDays);
-
-        Some newSolde
+    

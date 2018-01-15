@@ -40,7 +40,7 @@ module Manager =
                 GET >=> request (getResourceFromReq >> repository.GetAll >> JSON)
             ]
             path (resourcePath + "/Validate") >=> choose [
-                POST >=> request (getResourceFromReq >> repository.ValidateTimeOff >>  handleResource ({err = "Erreur lors du Refus"}))
+                POST >=> request (getResourceFromReq >> repository.ValidateTimeOff >>  handleResource ({err = "Erreur lors de la validation"}))
             ] 
             path (resourcePath + "/Refuse") >=> choose [
                 POST >=> request (getResourceFromReq >> repository.RefuseTimeOff >>  handleResource ({err =  "Erreur lors du Refus"}))

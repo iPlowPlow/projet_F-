@@ -188,11 +188,11 @@ module Logic =
         | CancelPendingValidation request ->
             Ok [RequestCancelValidated (request,myDate)]
         | Validated request ->
-            Ok [RequestCancelRefused (request,myDate)]
+            Ok [RequestCancelValidated (request,myDate)]
         | PendingValidation request ->
-            Ok [RequestCancelRefused (request,myDate)]
+            Ok [RequestCancelValidated (request,myDate)]
         | CancelRefused request ->
-            Ok [RequestCancelRefused (request,myDate)]
+            Ok [RequestCancelValidated (request,myDate)]
         | _ ->
             Error "Cancel Request cannot be validate"
 
